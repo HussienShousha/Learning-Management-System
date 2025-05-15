@@ -11,12 +11,14 @@ import java.util.List;
 
 @Service
 public class AssignmentService {
-
     private final AssignmentRepository assignmentRepository;
     private final SubmissionRepository submissionRepository;
     private final CourseRepository courseRepository;
     private final StudentRepository studentRepository;
     private final EnrollmentRepository enrollmentRepository;
+
+    private static final String ASSIGNMENT_NOT_FOUND = "Assignment not found";
+    private static final String STUDENT_NOT_FOUND = "Student not found";
 
     public AssignmentService(AssignmentRepository assignmentRepository, SubmissionRepository submissionRepository,
                              CourseRepository courseRepository, StudentRepository studentRepository,
@@ -40,11 +42,10 @@ public class AssignmentService {
         Student student = studentRepository.findById(loggedInInstructor.getUserId())
                 .orElseThrow(()-> new IllegalArgumentException("You're not a student"));
 
-        Boolean isExist = enrollmentRepository.existsByStudentAndCourse(student, course);
+        boolean isExist = enrollmentRepository.existsByStudentAndCourse(student, course);
         if (!isExist) {
             throw new IllegalArgumentException("You're not enrolled in this course");
         }
-
 
         List<Submission> submissions = submissionRepository.findByStudentId(student);
 
@@ -53,6 +54,7 @@ public class AssignmentService {
                 throw new IllegalArgumentException("You've already submitted this assignment");
             }
         }
+
         Assignment assignment1 = new Assignment();
         assignment1.setAssignmentId(assignment.getAssignmentId());
         assignment1.setDescription(assignment.getAssignmentDescription());
@@ -66,30 +68,16 @@ public class AssignmentService {
     }
 
 
-    public void gradeAssignment(int studentID, int assigID, float grade, HttpServletRequest request ) {
-        Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
-        if (loggedInInstructor == null) {
-            throw new IllegalArgumentException("You are not logged in");
-        }
+    public void gradeAssignment(int studentID, int assignmentId, float grade, HttpServletRequest request ) {
+        getUserAttribute(studentID, assignmentId, request);
 
-        Assignment assignment = assignmentRepository.findById(assigID)
-                .orElseThrow(()-> new IllegalArgumentException("Assignment not found"));
-
-
-        if (loggedInInstructor.getUserId() != assignment.getCourseID().getInstructorId().getUserAccountId()){
-            throw new IllegalArgumentException("You're not the instructor of this course");
-        }
-
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(()-> new IllegalArgumentException(ASSIGNMENT_NOT_FOUND));
 
         Student student = studentRepository.findById(studentID)
-                .orElseThrow(()-> new IllegalArgumentException("Student not found"));
+                .orElseThrow(()-> new IllegalArgumentException(STUDENT_NOT_FOUND));
 
         List<Submission> submission = submissionRepository.findByStudentId(student);
-
-
-        if (submission.isEmpty()) {
-            throw new IllegalArgumentException("Student has no submissions");
-        }
 
         for (Submission s : submission) {
             if (s.getAssignmentId().getAssignmentId() == assignment.getAssignmentId()) {
@@ -102,31 +90,16 @@ public class AssignmentService {
 
     }
 
-    public void saveAssignmentFeedback(int studentID, int assigID, String feedback, HttpServletRequest request) {
-        Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
-        if (loggedInInstructor == null) {
-            throw new IllegalArgumentException("You are not logged in");
-        }
+    public void saveAssignmentFeedback(int studentID, int assignmentId, String feedback, HttpServletRequest request) {
+        getUserAttribute(studentID, assignmentId, request);
 
-
-        Assignment assignment = assignmentRepository.findById(assigID)
-                .orElseThrow(()-> new IllegalArgumentException("Assignment not found"));
-
-
-        if (loggedInInstructor.getUserId() != assignment.getCourseID().getInstructorId().getUserAccountId()){
-            throw new IllegalArgumentException("You're not the instructor of this course");
-        }
-
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(()-> new IllegalArgumentException(ASSIGNMENT_NOT_FOUND));
 
         Student student = studentRepository.findById(studentID)
-                .orElseThrow(()-> new IllegalArgumentException("Student not found"));
+                .orElseThrow(()-> new IllegalArgumentException(STUDENT_NOT_FOUND));
 
         List<Submission> submission = submissionRepository.findByStudentId(student);
-
-
-        if (submission.isEmpty()) {
-            throw new IllegalArgumentException("Student has no submissions");
-        }
 
         for (Submission s : submission) {
             if (s.getAssignmentId().getAssignmentId() == assignment.getAssignmentId()) {
@@ -138,19 +111,42 @@ public class AssignmentService {
         throw new IllegalArgumentException("Student didn't submit this assignment");
     }
 
-    public String getFeedback(int assigID, HttpServletRequest request) {
+    private void getUserAttribute(int studentID, int assignmentId, HttpServletRequest request) {
         Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
         if (loggedInInstructor == null) {
             throw new IllegalArgumentException("You are not logged in");
         }
-        Assignment assignment = assignmentRepository.findById(assigID)
-                .orElseThrow(()-> new IllegalArgumentException("Assignment not found"));
+
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(()-> new IllegalArgumentException(ASSIGNMENT_NOT_FOUND));
+
+        if (loggedInInstructor.getUserId() != assignment.getCourseID().getInstructorId().getUserAccountId()){
+            throw new IllegalArgumentException("You're not the instructor of this course");
+        }
+
+        Student student = studentRepository.findById(studentID)
+                .orElseThrow(()-> new IllegalArgumentException(STUDENT_NOT_FOUND));
+
+        List<Submission> submission = submissionRepository.findByStudentId(student);
+
+        if (submission.isEmpty()) {
+            throw new IllegalArgumentException("Student has no submissions");
+        }
+    }
+
+    public String getFeedback(int assignmentId, HttpServletRequest request) {
+        Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
+        if (loggedInInstructor == null) {
+            throw new IllegalArgumentException("You are not logged in");
+        }
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(()-> new IllegalArgumentException(ASSIGNMENT_NOT_FOUND));
 
 
         Student student = studentRepository.findById(loggedInInstructor.getUserId())
                 .orElseThrow(()-> new IllegalArgumentException("You're not a student"));
 
-        Boolean isExist = enrollmentRepository.existsByStudentAndCourse(student, assignment.getCourseID());
+        boolean isExist = enrollmentRepository.existsByStudentAndCourse(student, assignment.getCourseID());
         if (!isExist) {
             throw new IllegalArgumentException("You're not enrolled in this course");
         }
@@ -168,16 +164,12 @@ public class AssignmentService {
             if (s.getAssignmentId().getAssignmentId() == assignment.getAssignmentId()) {
                 if (s.getFeedback() == null){
                     feedback =  "There is no feedback yet";
-                    break;
-
-            }
+                }
                 else {
                     feedback =  s.getFeedback();
-                    break;
                 }
+            }
         }
-        throw new IllegalArgumentException("Student didn't submit this assignment");
-    }
         return feedback;
     }
 
@@ -185,7 +177,7 @@ public class AssignmentService {
     {
         if (assignmentRepository.existsById(assignmentId))
         {
-            Assignment assignment = assignmentRepository.findById(assignmentId).get();
+            Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new IllegalArgumentException(ASSIGNMENT_NOT_FOUND));
             List <Submission> assignmentSubmissions = submissionRepository.findAllByAssignmentId(assignment);
             Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
             int instructorId = assignment.getCourseID().getInstructorId().getUserAccountId();

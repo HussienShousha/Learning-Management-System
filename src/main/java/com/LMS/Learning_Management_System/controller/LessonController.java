@@ -1,7 +1,6 @@
 package com.LMS.Learning_Management_System.controller;
 
 import com.LMS.Learning_Management_System.dto.LessonDto;
-import com.LMS.Learning_Management_System.entity.Course;
 import com.LMS.Learning_Management_System.entity.Lesson;
 import com.LMS.Learning_Management_System.service.LessonService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,9 +14,11 @@ import java.util.List;
 @RequestMapping("/api/lesson")
 public class LessonController {
     private final LessonService lessonService;
+
     public LessonController(LessonService lessonService) {
         this.lessonService = lessonService;
     }
+
     @PostMapping("/add_lesson")
     public ResponseEntity<String> addLesson(@RequestBody Lesson lesson , HttpServletRequest request){
         try {
@@ -27,20 +28,22 @@ public class LessonController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @GetMapping("/get_all_lessons/{courseId}")
-    public ResponseEntity<?> getAllLessons(@PathVariable int courseId , HttpServletRequest request) {
+    public ResponseEntity<String> getAllLessons(@PathVariable int courseId , HttpServletRequest request) {
         try {
             List<LessonDto> lessons = lessonService.getLessonsByCourseId(courseId , request);
-            return ResponseEntity.ok(lessons);
+            return ResponseEntity.ok(lessons.toString());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @GetMapping("/lesson_id/{lessonId}")
-    public ResponseEntity<?> getLessonById(@PathVariable int lessonId , HttpServletRequest request) {
+    public ResponseEntity<String> getLessonById(@PathVariable int lessonId , HttpServletRequest request) {
         try {
             LessonDto lesson = lessonService.getLessonById(lessonId, request);
-            return ResponseEntity.ok(lesson);
+            return ResponseEntity.ok(lesson.toString());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -58,6 +61,7 @@ public class LessonController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @DeleteMapping("/delete/lesson_id/{lessonId}/course_id/{courseId}")
     public ResponseEntity<String> deleteLesson(@PathVariable int lessonId , @PathVariable int courseId,HttpServletRequest request) {
         try {
@@ -67,13 +71,14 @@ public class LessonController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PostMapping("/studnet_enter_lesson/course_id/{courseId}/lesson_id/{lessonId}/otp/{otp}")
-    public ResponseEntity<?> StudentEnterLesson(@PathVariable int courseId ,
+
+    @PostMapping("/student_enter_lesson/course_id/{courseId}/lesson_id/{lessonId}/otp/{otp}")
+    public ResponseEntity<String> studentEnterLesson(@PathVariable int courseId ,
                                                 @PathVariable int lessonId ,
                                                 @PathVariable String otp ,
                                                 HttpServletRequest request) {
         try{
-            lessonService.StudentEnterLesson( courseId , lessonId  , otp,request);
+            lessonService.studentEnterLesson( courseId , lessonId  , otp,request);
             return ResponseEntity.ok("Student entered lesson successfully.");
         }
         catch (IllegalArgumentException e)
