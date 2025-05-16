@@ -1,4 +1,5 @@
 package com.LMS.Learning_Management_System.service;
+
 import com.LMS.Learning_Management_System.dto.LessonDto;
 import com.LMS.Learning_Management_System.entity.*;
 import com.LMS.Learning_Management_System.repository.*;
@@ -10,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class LessonService {
@@ -28,21 +28,9 @@ public class LessonService {
 
     public void addLesson(Lesson lesson, HttpServletRequest request) {
         // auth
-        Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
-        if (loggedInInstructor == null) {
-            throw new IllegalArgumentException("No user is logged in.");
-        }
-        if (loggedInInstructor.getUserTypeId() == null || loggedInInstructor.getUserTypeId().getUserTypeId() != 3) {
-            throw new IllegalArgumentException("Logged-in user is not an instructor.");
-        }
+        getUserAttribute(lesson, request);
         Course course = courseRepository.findById(lesson.getCourseId().getCourseId())
                 .orElseThrow(() -> new IllegalArgumentException("No such CourseId"));
-
-        int ids = course.getInstructorId().getUserAccountId();
-        if (loggedInInstructor.getUserId() != ids) {
-            throw new IllegalArgumentException("You are not the Instructor of this course");
-        }
-
 
         if (lesson.getOTP() == null || lesson.getOTP().isEmpty()) {
             throw new IllegalArgumentException("OTP value cannot be null");
@@ -56,9 +44,31 @@ public class LessonService {
         lessonRepository.save(lesson);
     }
 
+    private void getUserAttribute(Lesson lesson, HttpServletRequest request) {
+        validateUserId(request);
+        Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
+        Course course = courseRepository.findById(lesson.getCourseId().getCourseId())
+                .orElseThrow(() -> new IllegalArgumentException("No such CourseId"));
+
+        int ids = course.getInstructorId().getUserAccountId();
+        if (loggedInInstructor.getUserId() != ids) {
+            throw new IllegalArgumentException("You are not the Instructor of this course");
+        }
+    }
+
+    static void validateUserId(HttpServletRequest request) {
+        Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
+        if (loggedInInstructor == null) {
+            throw new IllegalArgumentException("No user is logged in.");
+        }
+        if (loggedInInstructor.getUserTypeId() == null || loggedInInstructor.getUserTypeId().getUserTypeId() != 3) {
+            throw new IllegalArgumentException("Logged-in user is not an instructor.");
+        }
+    }
+
     public List<LessonDto> getLessonsByCourseId(int courseId, HttpServletRequest request) {
 
-        Course course = check_course_before_logic(courseId, request);
+        Course course = checkCourseBeforeLogic(courseId, request);
         Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
         if (course.getInstructorId().getUserAccountId() != loggedInInstructor.getUserId()) {
             throw new IllegalArgumentException("You are not the Instructor of this course");
@@ -87,20 +97,7 @@ public class LessonService {
     }
 
     public void updateLesson(int lessonId, Lesson updatedLesson, HttpServletRequest request) {
-        Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
-        if (loggedInInstructor == null) {
-            throw new IllegalArgumentException("No user is logged in.");
-        }
-        if (loggedInInstructor.getUserTypeId() == null || loggedInInstructor.getUserTypeId().getUserTypeId() != 3) {
-            throw new IllegalArgumentException("Logged-in user is not an instructor.");
-        }
-        Course course = courseRepository.findById(updatedLesson.getCourseId().getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("No such CourseId"));
-
-        int ids = course.getInstructorId().getUserAccountId();
-        if (loggedInInstructor.getUserId() != ids) {
-            throw new IllegalArgumentException("You are not the Instructor of this course");
-        }
+        getUserAttribute(updatedLesson, request);
 
         Lesson existingLesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new IllegalArgumentException("Lesson not found with ID: " + lessonId));
@@ -113,7 +110,7 @@ public class LessonService {
     }
 
     public void deleteLesson(int lessonId, int courseId, HttpServletRequest request) {
-        Course course = check_course_before_logic(courseId, request);
+        Course course = checkCourseBeforeLogic(courseId, request);
         Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
         if (course.getInstructorId().getUserAccountId() != loggedInInstructor.getUserId()) {
             throw new IllegalArgumentException("You are not the Instructor of this course");
@@ -133,17 +130,12 @@ public class LessonService {
                         lesson.getContent(),
                         lesson.getCreationTime()
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    private Course check_course_before_logic(int courseId, HttpServletRequest request) {
+    private Course checkCourseBeforeLogic(int courseId, HttpServletRequest request) {
         Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
-        if (loggedInInstructor == null) {
-            throw new IllegalArgumentException("No user is logged in.");
-        }
-        if (loggedInInstructor.getUserTypeId() == null || loggedInInstructor.getUserTypeId().getUserTypeId() != 3) {
-            throw new IllegalArgumentException("Logged-in user is not an instructor.");
-        }
+        validateUserId(request);
         Course existingCourse = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("No course found with the given ID: " + courseId));
 
@@ -155,7 +147,7 @@ public class LessonService {
     }
 
 
-    public void StudentEnterLesson(int courseId, int lessonId,String otp, HttpServletRequest request)
+    public void studentEnterLesson(int courseId, int lessonId,String otp, HttpServletRequest request)
     {
         Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
         if(loggedInInstructor ==null)
@@ -192,15 +184,13 @@ public class LessonService {
         lessonAttendance.setLessonId(existingLesson);
         lessonAttendance.setStudentId(student);
         lessonAttendanceRepository.save(lessonAttendance);
-
-
     }
 
     public List <String> lessonAttendance (int lessonId, HttpServletRequest request)
     {
         if (lessonRepository.existsById(lessonId))
         {
-            Lesson lesson = lessonRepository.findById(lessonId).get();
+            Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
             List <LessonAttendance> lessonAttendances = lessonAttendanceRepository.findAllByLessonId(lesson);
             Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
             int instructorId = lesson.getCourseId().getInstructorId().getUserAccountId();

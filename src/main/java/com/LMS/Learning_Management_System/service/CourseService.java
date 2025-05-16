@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CourseService {
@@ -30,13 +29,9 @@ public class CourseService {
     }
     public void addCourse(Course course , HttpServletRequest request , int instructorId){
         // auth
+        LessonService.validateUserId(request);
         Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
-        if (loggedInInstructor == null) {
-            throw new IllegalArgumentException("No user is logged in.");
-        }
-        if (loggedInInstructor.getUserTypeId() == null || loggedInInstructor.getUserTypeId().getUserTypeId() != 3) {
-            throw new IllegalArgumentException("Logged-in user is not an instructor.");
-        }
+        LessonService.validateUserId(request);
         if(instructorId != loggedInInstructor.getUserId()){
             throw new IllegalArgumentException("Logged-in user is an another instructor.");
         }
@@ -54,6 +49,7 @@ public class CourseService {
         course.setInstructorId(instructor);
         courseRepository.save(course);
     }
+
     public List<CourseDto> getAllCourses(HttpServletRequest request) {
         Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
         if (loggedInInstructor == null) {
@@ -77,8 +73,9 @@ public class CourseService {
             int flag = 0;
             List<Enrollment>enrollments = enrollmentRepository.findByCourse(course);
             for (Enrollment enrollment : enrollments) {
-                if(enrollment.getStudent().getUserAccountId() == loggedInInstructor.getUserId()){
+                if (enrollment.getStudent().getUserAccountId() == loggedInInstructor.getUserId()) {
                     flag = 1;
+                    break;
                 }
             }
             if(flag==0)
@@ -96,21 +93,24 @@ public class CourseService {
         );
 
     }
+
     public void updateCourse(int courseId, Course updatedCourse, HttpServletRequest request) {
 
-        Course existingCourse = check_before_logic(courseId , request);
+        Course existingCourse = checkBeforeLogic(courseId , request);
         existingCourse.setCourseName(updatedCourse.getCourseName());
         existingCourse.setDescription(updatedCourse.getDescription());
         existingCourse.setDuration(updatedCourse.getDuration());
 
         courseRepository.save(existingCourse);
     }
+
     public void deleteCourse(int courseId, HttpServletRequest request) {
-        Course existingCourse = check_before_logic(courseId , request);
+        Course existingCourse = checkBeforeLogic(courseId , request);
         courseRepository.delete(existingCourse);
     }
+
     public void uploadMediaFile(int courseId, MultipartFile file, HttpServletRequest request) {
-        Course course = check_before_logic(courseId , request);
+        Course course = checkBeforeLogic(courseId , request);
 
         String uploadDir = "media/uploads/";
         File directory = new File(uploadDir);
@@ -124,25 +124,17 @@ public class CourseService {
         try {
             file.transferTo(destination);
         } catch (IOException e) {
-            throw new RuntimeException("File upload failed.", e);
+            throw new IllegalArgumentException("File upload failed.", e);
         }
 
         course.setMedia(fileName);
         courseRepository.save(course);
     }
 
-
-
-
-    private Course check_before_logic(int courseId, HttpServletRequest request)
+    private Course checkBeforeLogic(int courseId, HttpServletRequest request)
     {
         Users loggedInInstructor = (Users) request.getSession().getAttribute("user");
-        if (loggedInInstructor == null) {
-            throw new IllegalArgumentException("No user is logged in.");
-        }
-        if (loggedInInstructor.getUserTypeId() == null || loggedInInstructor.getUserTypeId().getUserTypeId() != 3) {
-            throw new IllegalArgumentException("Logged-in user is not an instructor.");
-        }
+        LessonService.validateUserId(request);
         Course existingCourse = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("No course found with the given ID: " + courseId));
 
@@ -152,6 +144,7 @@ public class CourseService {
         }
         return existingCourse;
     }
+
     private List<CourseDto> convertToCourseDtoList(List<Course> courses) {
         return courses.stream()
                 .map(course -> new CourseDto(
@@ -162,7 +155,7 @@ public class CourseService {
                         course.getMedia(),
                         course.getInstructorId().getFirstName()
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void sendNotificationsToEnrolledStudents(int courseId, HttpServletRequest request){
@@ -172,6 +165,4 @@ public class CourseService {
             notificationsService.sendNotification(message,student.getUserAccountId());
         }
     }
-
-
 }
