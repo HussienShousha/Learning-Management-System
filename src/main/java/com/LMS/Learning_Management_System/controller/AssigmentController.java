@@ -1,16 +1,12 @@
 package com.LMS.Learning_Management_System.controller;
 
 import com.LMS.Learning_Management_System.dto.AssignmentDto;
-import com.LMS.Learning_Management_System.entity.Assignment;
-import com.LMS.Learning_Management_System.entity.Student;
-import com.LMS.Learning_Management_System.entity.Submission;
 import com.LMS.Learning_Management_System.service.AssignmentService;
 import com.LMS.Learning_Management_System.service.NotificationsService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,11 +31,11 @@ public class AssigmentController {
         }
     }
 
-    @PutMapping("/gradeAssignment/studentID={studentID}/assigID={assigID}/grade={grade}")
-    public ResponseEntity<String> gradeAssignment(@PathVariable int studentID, @PathVariable int assigID, @PathVariable float grade, HttpServletRequest request ){
+    @PutMapping("/gradeAssignment/studentID={studentID}/assigmentID={assigmentID}/grade={grade}")
+    public ResponseEntity<String> gradeAssignment(@PathVariable int studentID, @PathVariable int assigmentID, @PathVariable float grade, HttpServletRequest request ){
         try {
-            assignmentService.gradeAssignment(studentID, assigID, grade, request);
-            String message = "Assignment "+assigID+" grade is uploaded";
+            assignmentService.gradeAssignment(studentID, assigmentID, grade, request);
+            String message = "Assignment "+ assigmentID +" grade is uploaded";
             notificationsService.sendNotification(message,studentID);
             return ResponseEntity.ok("Assignment has been graded successfully.");
         } catch (IllegalArgumentException e) {
@@ -47,10 +43,10 @@ public class AssigmentController {
         }
     }
 
-    @PutMapping("/saveAssignmentFeedback/studentID={studentID}/assigID={assigID}/feedback={feedback}")
-    public ResponseEntity<String> saveAssignmentFeedback(@PathVariable int studentID, @PathVariable int assigID, @PathVariable String feedback, HttpServletRequest request ){
+    @PutMapping("/saveAssignmentFeedback/studentID={studentID}/assigmentID={assigmentID}/feedback={feedback}")
+    public ResponseEntity<String> saveAssignmentFeedback(@PathVariable int studentID, @PathVariable int assigmentID, @PathVariable String feedback, HttpServletRequest request ){
         try {
-            assignmentService.saveAssignmentFeedback(studentID, assigID, feedback, request);
+            assignmentService.saveAssignmentFeedback(studentID, assigmentID, feedback, request);
             return ResponseEntity.ok("Assignment feedback is saved successfully.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
