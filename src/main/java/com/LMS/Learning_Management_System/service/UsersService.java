@@ -5,7 +5,6 @@ import com.LMS.Learning_Management_System.repository.*;
 import com.LMS.Learning_Management_System.util.UserSignUpRequest;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +18,7 @@ public class UsersService {
     private final StudentRepository studentRepository;
     private final AdminRepository adminRepository;
     private final InstructorRepository instructorRepository;
+
     public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, UsersTypeRepository usersTypeRepository, StudentRepository studentRepository, AdminRepository adminRepository, InstructorRepository instructorRepository) {
         this.passwordEncoder = passwordEncoder;
         this.usersRepository = usersRepository;
@@ -27,6 +27,7 @@ public class UsersService {
         this.adminRepository = adminRepository;
         this.instructorRepository = instructorRepository;
     }
+
     public void save(UserSignUpRequest signUpRequest , HttpServletRequest request) {
         Users loggedInUser = (Users) request.getSession().getAttribute("user");
         if (loggedInUser == null) {
@@ -65,5 +66,4 @@ public class UsersService {
     public boolean validatePassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
-
 }

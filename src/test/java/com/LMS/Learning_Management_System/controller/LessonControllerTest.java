@@ -125,13 +125,13 @@ class LessonControllerTest {
         String OTP = "12345";
 
         HttpServletRequest request = mock(HttpServletRequest.class);
-        doNothing().when(lessonService).StudentEnterLesson(eq(courseId),eq(lessonId),eq(OTP), eq(request));
+        doNothing().when(lessonService).studentEnterLesson(eq(courseId),eq(lessonId),eq(OTP), eq(request));
 
-        ResponseEntity<?> response = lessonController.StudentEnterLesson(courseId,lessonId,OTP, request);
+        ResponseEntity<?> response = lessonController.studentEnterLesson(courseId,lessonId,OTP, request);
         assertEquals(200, response.getStatusCodeValue());
 
         assertEquals("Student entered lesson successfully.", response.getBody());
-        verify(lessonService, times(1)).StudentEnterLesson(eq(courseId),eq(lessonId),eq(OTP), eq(request));
+        verify(lessonService, times(1)).studentEnterLesson(eq(courseId),eq(lessonId),eq(OTP), eq(request));
     }
 
     @Test

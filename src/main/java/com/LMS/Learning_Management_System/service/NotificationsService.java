@@ -35,7 +35,6 @@ public class NotificationsService {
                 notificationsRepository.save(notification);
             }
         }
-
         return notificationsMessage;
     }
 
@@ -51,20 +50,16 @@ public class NotificationsService {
                 notificationsRepository.save(notification);
             }
         }
-
         return notificationsMessage;
     }
 
     public void sendNotification(String message, int id) {
-        Users user = usersRepository.findById(id).get();
+        Users user = usersRepository.findById(id).orElseThrow();
         Notifications enrollmentNotification = new Notifications();
         enrollmentNotification.setUserId(user);
         enrollmentNotification.setRead(false);
         enrollmentNotification.setCreatedTime(new Date());
         enrollmentNotification.setMessage(message);
         notificationsRepository.save(enrollmentNotification);
-
     }
-
-
 }

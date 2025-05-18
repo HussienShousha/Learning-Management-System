@@ -188,7 +188,7 @@ class LessonServiceTest {
         when(enrollmentRepository.findByCourse(course)).thenReturn(enrollments);
         when(lessonAttendanceRepository.existsByLessonIdAndStudentId(lesson, new Student())).thenReturn(false);
 
-        lessonService.StudentEnterLesson(1, 1, "12345", request);
+        lessonService.studentEnterLesson(1, 1, "12345", request);
         verify(lessonAttendanceRepository, times(1)).save(any(LessonAttendance.class));
     }
 

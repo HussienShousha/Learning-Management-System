@@ -16,7 +16,7 @@ public class Course {
 
     private String courseName;
 
-    // when delete course didnot delete instructor
+    // when delete course didn't delete instructor
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "instructor_id", referencedColumnName = "user_account_id")
     private Instructor instructorId;
@@ -46,7 +46,6 @@ public class Course {
         this.media = media;
         this.duration = duration;
         this.creationDate = creationDate;
-        this.lessons = lessons;
     }
 
     public int getCourseId() {

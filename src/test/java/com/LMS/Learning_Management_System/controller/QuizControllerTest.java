@@ -60,12 +60,12 @@ class QuizControllerTest {
         quizDto.setQuizId(1);
         quizDto.setCourse_id(1);
         quizDto.setType(1);
-        when(quizService.Create(eq(1),eq(1),eq(request))).thenReturn(1);
+        when(quizService.create(eq(1),eq(1),eq(request))).thenReturn(1);
 
         ResponseEntity<?> response = quizController.addQuiz(quizDto, request);
         assertEquals(200,response.getStatusCodeValue());
         assertEquals(ans,response.getBody());
-        verify(quizService, times(1)).Create(eq(1),eq(1), eq(request));
+        verify(quizService, times(1)).create(eq(1),eq(1), eq(request));
     }
     @Test
     void testAddQuestionsBank() throws Exception {

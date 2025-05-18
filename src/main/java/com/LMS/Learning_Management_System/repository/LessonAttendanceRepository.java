@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface LessonAttendanceRepository extends JpaRepository<LessonAttendance, Integer> {
     boolean existsByLessonIdAndStudentId(Lesson lessonId , Student studentId);
-    List <LessonAttendance> findAllByLessonId (Lesson LessonId);
+    List <LessonAttendance> findAllByLessonId (Lesson lessonId);
 }

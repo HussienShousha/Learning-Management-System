@@ -113,7 +113,7 @@ public class QuizServiceTest {
         when(courseRepository.findById(1)).thenReturn(Optional.of(course));
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            quizService.Create(1, 1, request);
+            quizService.create(1, 1, request);
         });
 
         assertEquals("Logged-in user is not an instructor.", exception.getMessage());
@@ -132,7 +132,7 @@ public class QuizServiceTest {
         when(courseRepository.findById(1)).thenReturn(Optional.of(course));
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            quizService.Create(1, 1, request);
+            quizService.create(1, 1, request);
         });
 
         assertEquals("Logged-in instructor does not have access for this course.", exception.getMessage());
@@ -151,7 +151,7 @@ public class QuizServiceTest {
                 .findQuestionsByCourseIdAndQuestionType(course.getCourseId(),1)).thenReturn(new ArrayList<Question>());
 
         Exception exception = assertThrows(Exception.class, () -> {
-            quizService.Create(1, 1, request);
+            quizService.create(1, 1, request);
         });
 
         assertEquals("No enough Questions to create quiz!\n", exception.getMessage());
@@ -175,7 +175,7 @@ public class QuizServiceTest {
                 .findEmptyQuestionsByCourseIdAndQuestionType(course.getCourseId(),1)).thenReturn(new ArrayList<>());
 
         Exception exception = assertThrows(Exception.class, () -> {
-            quizService.Create(1, 1, request);
+            quizService.create(1, 1, request);
         });
 
         assertEquals("No enough unassigned questions to create new quiz! number: "+0+" type "+1+"\n", exception.getMessage());

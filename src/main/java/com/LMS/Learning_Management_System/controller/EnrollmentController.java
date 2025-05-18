@@ -1,4 +1,5 @@
 package com.LMS.Learning_Management_System.controller;
+
 import com.LMS.Learning_Management_System.dto.StudentDto;
 import com.LMS.Learning_Management_System.entity.Enrollment;
 import com.LMS.Learning_Management_System.service.EnrollmentService;
@@ -6,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+
 @RestController
 @RequestMapping("/api/enrollment")
 public class EnrollmentController {
@@ -24,13 +26,14 @@ public class EnrollmentController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @GetMapping("/view_enrolled_students/{courseId}")
-    public ResponseEntity<?> viewEnrolledStudents(@PathVariable int courseId, HttpServletRequest request){
+    public ResponseEntity<List<StudentDto>> viewEnrolledStudents(@PathVariable int courseId, HttpServletRequest request){
         try {
             List<StudentDto> students = enrollmentService.viewEnrolledStudents(courseId , request);
             return ResponseEntity.ok(students);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -43,5 +46,4 @@ public class EnrollmentController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 }
