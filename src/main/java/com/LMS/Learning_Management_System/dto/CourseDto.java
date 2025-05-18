@@ -1,6 +1,6 @@
 package com.LMS.Learning_Management_System.dto;
 
-// this Dto for get course by , id , we send the important data for course not all course data , that is the data transfer object
+// this Dto for get course by, id, we send the important data for course, not all course data, that is the data transfer object
 
 public class CourseDto {
     private int courseId;
