@@ -1,6 +1,5 @@
 package com.LMS.Learning_Management_System.entity;
 
-
 import jakarta.persistence.*;
 
 @Entity

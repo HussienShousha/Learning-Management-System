@@ -1,10 +1,7 @@
 package com.LMS.Learning_Management_System.repository;
 
-import com.LMS.Learning_Management_System.entity.Enrollment;
 import com.LMS.Learning_Management_System.entity.Grading;
-import com.LMS.Learning_Management_System.entity.Question;
 import com.LMS.Learning_Management_System.entity.Quiz;
-import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

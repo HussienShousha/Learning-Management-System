@@ -1,12 +1,8 @@
 package com.LMS.Learning_Management_System.controller;
 
-import com.LMS.Learning_Management_System.dto.CourseDto;
 import com.LMS.Learning_Management_System.dto.GradingDto;
 import com.LMS.Learning_Management_System.dto.QuestionDto;
 import com.LMS.Learning_Management_System.dto.QuizDto;
-import com.LMS.Learning_Management_System.entity.Course;
-import com.LMS.Learning_Management_System.entity.Users;
-import com.LMS.Learning_Management_System.repository.QuizRepository;
 import com.LMS.Learning_Management_System.service.QuizService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -25,36 +21,36 @@ public class QuizController {
     }
 
     @GetMapping("/quiz_id/{id}")
-    public ResponseEntity<?> getQuizById(@PathVariable int id, HttpServletRequest request) {
+    public ResponseEntity<QuizDto> getQuizById(@PathVariable int id, HttpServletRequest request) {
         try {
             QuizDto quizDTO = quizService.getQuizByID(id , request);
             return ResponseEntity.ok(quizDTO);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
-    @GetMapping("/active_quiz/{course_id}")
-    public ResponseEntity<?> getActiveQuiz(@PathVariable int course_id, HttpServletRequest request) {
+    @GetMapping("/active_quiz/{courseId}")
+    public ResponseEntity<String> getActiveQuiz(@PathVariable int courseId, HttpServletRequest request) {
         try {
-            String quiz_id = quizService.getActiveQuiz(course_id , request);
-            return ResponseEntity.ok(quiz_id);
+            String quizId = quizService.getActiveQuiz(courseId , request);
+            return ResponseEntity.ok(quizId);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping("/add_quiz")
-    public ResponseEntity<?> addQuiz(@RequestBody QuizDto quizDto, HttpServletRequest request)
+    public ResponseEntity<String> addQuiz(@RequestBody QuizDto quizDto, HttpServletRequest request)
     {
         try {
-            int quiz_id = quizService.Create(quizDto.getCourse_id(),quizDto.getType(), request);
-            return ResponseEntity.ok("Quiz created successfully. Use this id: "+quiz_id+" to enter the quiz");
+            int quizId = quizService.create(quizDto.getCourse_id(),quizDto.getType(), request);
+            return ResponseEntity.ok("Quiz created successfully. Use this id: " + quizId + " to enter the quiz");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     @PostMapping("/add_questions_bank")
-    public ResponseEntity<?> addQuestionsBank(@RequestBody QuizDto quizDto, HttpServletRequest request)
+    public ResponseEntity<String> addQuestionsBank(@RequestBody QuizDto quizDto, HttpServletRequest request)
     {
         try {
             quizService.createQuestionBank(quizDto.getCourse_id(),quizDto.getQuestionList(),request);
@@ -64,7 +60,7 @@ public class QuizController {
         }
     }
     @PostMapping("/add_questions")
-    public ResponseEntity<?> addQuestions(@RequestBody QuestionDto questionDto, HttpServletRequest request)
+    public ResponseEntity<String> addQuestions(@RequestBody QuestionDto questionDto, HttpServletRequest request)
     {
         try {
             quizService.addQuestion(questionDto,request);
@@ -75,18 +71,18 @@ public class QuizController {
     }
 
     @GetMapping("/get_question_bank/{id}")
-    public ResponseEntity<?> getQuestionBank(@PathVariable int id, HttpServletRequest request)
+    public ResponseEntity<List<QuestionDto>> getQuestionBank(@PathVariable int id, HttpServletRequest request)
     {
         try {
-            QuizDto quizDto=quizService.getQuestionBank(id,request);
+            QuizDto quizDto = quizService.getQuestionBank(id,request);
             return ResponseEntity.ok(quizDto.getQuestionList());
         } catch (Exception  e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @PostMapping("/grade_quiz")
-    public ResponseEntity<?> gradeQuiz(@RequestBody GradingDto gradingDto, HttpServletRequest request)
+    public ResponseEntity<String> gradeQuiz(@RequestBody GradingDto gradingDto, HttpServletRequest request)
     {
         try {
             quizService.gradeQuiz(gradingDto,request);
@@ -97,25 +93,25 @@ public class QuizController {
     }
 
     // get student quiz grades
-    @GetMapping("/get_quiz_grade/{quiz_id}/student/{student_id}")
-    public ResponseEntity<?> getQuizGradeByStudent(@PathVariable int quiz_id,@PathVariable int student_id, HttpServletRequest request)
+    @GetMapping("/get_quiz_grade/{quizId}/student/{studentId}")
+    public ResponseEntity<Integer> getQuizGradeByStudent(@PathVariable int quizId, @PathVariable int studentId, HttpServletRequest request)
     {
         try {
-            int grade=quizService.quizFeedback(quiz_id,student_id,request);
+            int grade = quizService.quizFeedback(quizId, studentId,request);
             return ResponseEntity.ok(grade);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Integer.valueOf(e.getMessage()));
         }
     }
 
     // get quiz questions
     @GetMapping("/get_quiz_questions/{id}")
-    public ResponseEntity<?> getQuizQuestions(@PathVariable int id, HttpServletRequest request)
+    public ResponseEntity<List<QuestionDto>> getQuizQuestions(@PathVariable int id, HttpServletRequest request)
     {
         try {
             return ResponseEntity.ok(quizService.getQuizQuestions(id,request));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 

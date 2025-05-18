@@ -1,4 +1,5 @@
 package com.LMS.Learning_Management_System.controller;
+
 import com.LMS.Learning_Management_System.entity.Instructor;
 import com.LMS.Learning_Management_System.service.InstructorService;
 import com.LMS.Learning_Management_System.service.NotificationsService;
@@ -18,6 +19,7 @@ public class InstructorController {
         this.instructorService = instructorService;
         this.notificationsService = notificationsService;
     }
+
     @PutMapping("/update_profile/{instructorId}")
     public ResponseEntity<String> updateUser(@PathVariable int instructorId,
                                              @RequestBody Instructor instructor,
@@ -36,7 +38,7 @@ public class InstructorController {
         return notificationsService.getAllNotifications(userId);
     }
 
-    @GetMapping("/unreadnotifications/{userId}")
+    @GetMapping("/unreadNotifications/{userId}")
     public List<String> getUnreadNotifications(@PathVariable int userId) {
         return notificationsService.getAllUnreadNotifications(userId);
     }

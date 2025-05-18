@@ -1,6 +1,5 @@
 package com.LMS.Learning_Management_System.dto;
 
-
 import java.util.Date;
 
 public class LessonDto {
@@ -13,7 +12,6 @@ public class LessonDto {
     private String content;
     private Date creationTime;
     public LessonDto() {
-
     }
 
     public LessonDto(int lessonId, int courseId , String lessonName, String lessonDescription, int lessonOrder, String OTP, String content, Date creationTime) {
@@ -26,7 +24,6 @@ public class LessonDto {
         this.content = content;
         this.creationTime = creationTime;
     }
-
 
     public int getLessonId() {
         return lessonId;
